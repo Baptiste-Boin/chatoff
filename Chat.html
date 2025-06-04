@@ -1,383 +1,353 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.6">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; -webkit-text-stroke: #000000; min-height: 16.0px}
-    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #4d5055; -webkit-text-stroke: #4d5055}
-    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #6f0ec3; -webkit-text-stroke: #6f0ec3}
-    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #18702b; -webkit-text-stroke: #18702b}
-    span.s1 {font-kerning: none; color: #6f0ec3; background-color: #ecf1f7; -webkit-text-stroke: 0px #6f0ec3}
-    span.s2 {font-kerning: none; background-color: #ecf1f7}
-    span.s3 {font-kerning: none; color: #0e6e6d; background-color: #ecf1f7; -webkit-text-stroke: 0px #0e6e6d}
-    span.s4 {font-kerning: none; color: #18702b; background-color: #ecf1f7; -webkit-text-stroke: 0px #18702b}
-    span.s5 {font-kerning: none}
-    span.s6 {font-kerning: none; color: #000000; background-color: #ecf1f7; -webkit-text-stroke: 0px #000000}
-    span.s7 {font-kerning: none; color: #4d5055; background-color: #ecf1f7; -webkit-text-stroke: 0px #4d5055}
-    span.s8 {font-kerning: none; color: #a4450b; background-color: #ecf1f7; -webkit-text-stroke: 0px #a4450b}
-    span.s9 {font-kerning: none; color: #6b0001; background-color: #ecf1f7; -webkit-text-stroke: 0px #6b0001}
-    span.s10 {font-kerning: none; color: #bf1c25; background-color: #ecf1f7; -webkit-text-stroke: 0px #bf1c25}
-  </style>
-</head>
-<body>
-<p class="p1"><span class="s1">import</span><span class="s2"> </span><span class="s3">React</span><span class="s2">, { useState, useEffect, useRef } </span><span class="s1">from</span><span class="s2"> </span><span class="s4">'react'</span><span class="s2">;</span></p>
-<p class="p1"><span class="s1">import</span><span class="s2"> { initializeApp } </span><span class="s1">from</span><span class="s2"> </span><span class="s4">'firebase/app'</span><span class="s2">;</span></p>
-<p class="p1"><span class="s1">import</span><span class="s2"> { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } </span><span class="s1">from</span><span class="s2"> </span><span class="s4">'firebase/auth'</span><span class="s2">;</span></p>
-<p class="p1"><span class="s1">import</span><span class="s2"> { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc } </span><span class="s1">from</span><span class="s2"> </span><span class="s4">'firebase/firestore'</span><span class="s2">;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s2">// Définition des variables globales fournies par l'environnement Canvas</span></p>
-<p class="p1"><span class="s1">const</span><span class="s2"> appId = </span><span class="s1">typeof</span><span class="s2"> __app_id !== </span><span class="s4">'undefined'</span><span class="s2"> ? __app_id : </span><span class="s4">'default-app-id'</span><span class="s2">;</span></p>
-<p class="p1"><span class="s1">const</span><span class="s2"> firebaseConfig = </span><span class="s1">typeof</span><span class="s2"> __firebase_config !== </span><span class="s4">'undefined'</span><span class="s2"> ? </span><span class="s3">JSON</span><span class="s2">.parse(__firebase_config) : {};</span></p>
-<p class="p1"><span class="s1">const</span><span class="s2"> initialAuthToken = </span><span class="s1">typeof</span><span class="s2"> __initial_auth_token !== </span><span class="s4">'undefined'</span><span class="s2"> ? initialAuthToken : </span><span class="s1">null</span><span class="s2">;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p4"><span class="s2">function</span><span class="s6"> </span><span class="s3">App</span><span class="s6">() {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [db, setDb] = useState(</span><span class="s1">null</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [auth, setAuth] = useState(</span><span class="s1">null</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [userId, setUserId] = useState(</span><span class="s1">null</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [messages, setMessages] = useState([]);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [newMessage, setNewMessage] = useState(</span><span class="s4">''</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [chatCode, setChatCode] = useState(</span><span class="s4">''</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [chatPassword, setChatPassword] = useState(</span><span class="s4">''</span><span class="s2">); </span><span class="s7">// Nouveau state pour le mot de passe du salon</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [userName, setUserName] = useState(</span><span class="s4">''</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [hasEnteredRoom, setHasEnteredRoom] = useState(</span><span class="s1">false</span><span class="s2">); </span><span class="s7">// Indique si l'accès au salon est validé</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [isUserNameSet, setIsUserNameSet] = useState(</span><span class="s1">false</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [loading, setLoading] = useState(</span><span class="s1">true</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> messagesEndRef = useRef(</span><span class="s1">null</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [accessError, setAccessError] = useState(</span><span class="s4">''</span><span class="s2">); </span><span class="s7">// Erreurs pour l'accès au salon (code/mdp)</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> [userNameError, setUserNameError] = useState(</span><span class="s4">''</span><span class="s2">);</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">  </span></span><span class="s2">// Initialisation de Firebase et authentification</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">const</span><span class="s2"> app = initializeApp(firebaseConfig);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">const</span><span class="s2"> firestore = getFirestore(app);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">const</span><span class="s2"> firebaseAuth = getAuth(app);</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>setDb(firestore);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>setAuth(firebaseAuth);</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">const</span><span class="s2"> unsubscribe = onAuthStateChanged(firebaseAuth, </span><span class="s1">async</span><span class="s2"> (user) =&gt; {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">if</span><span class="s2"> (user) {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>setUserId(user.uid);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>} </span><span class="s1">else</span><span class="s2"> {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">try</span><span class="s2"> {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span></span><span class="s1">if</span><span class="s2"> (initialAuthToken) {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span></span><span class="s1">await</span><span class="s2"> signInWithCustomToken(firebaseAuth, initialAuthToken);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>} </span><span class="s1">else</span><span class="s2"> {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span></span><span class="s1">await</span><span class="s2"> signInAnonymously(firebaseAuth);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>} </span><span class="s1">catch</span><span class="s2"> (error) {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>console.error(</span><span class="s4">"Erreur d'authentification:"</span><span class="s2">, error);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>setLoading(</span><span class="s1">false</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">return</span><span class="s2"> () =&gt; unsubscribe();</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>}, []);</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">  </span></span><span class="s2">// Écoute des messages en temps réel depuis Firestore pour le salon de chat spécifique</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">    </span></span><span class="s2">// Les messages sont chargés seulement si l'accès au salon et le nom d'utilisateur sont définis</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">if</span><span class="s2"> (db &amp;&amp; userId &amp;&amp; hasEnteredRoom &amp;&amp; isUserNameSet &amp;&amp; chatCode) {</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s2">// Chemin de la collection pour les messages du salon de chat spécifique</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s2">// Les messages sont stockés dans /artifacts/{appId}/public/data/chats/{chatCode}/messages</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">const</span><span class="s2"> messagesCollectionRef = collection(db, </span><span class="s4">`artifacts/</span><span class="s2">${appId}</span><span class="s4">/public/data/chats/</span><span class="s2">${chatCode}</span><span class="s4">/messages`</span><span class="s2">);</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s2">// Requête pour obtenir les messages triés par horodatage</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">const</span><span class="s2"> q = query(messagesCollectionRef, orderBy(</span><span class="s4">'timestamp'</span><span class="s2">));</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">const</span><span class="s2"> unsubscribe = onSnapshot(q, (snapshot) =&gt; {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">const</span><span class="s2"> fetchedMessages = snapshot.docs.map(doc =&gt; ({</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>id: doc.id,</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>...doc.data()</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>}));</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>setMessages(fetchedMessages);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>}, (error) =&gt; {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">        </span>console.error(</span><span class="s2">"Erreur lors de la récupération des messages:"</span><span class="s6">, error);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>});</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">return</span><span class="s2"> () =&gt; unsubscribe();</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>}, [db, userId, hasEnteredRoom, isUserNameSet, chatCode]);</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">  </span></span><span class="s2">// Défilement automatique vers le bas des messages</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>messagesEndRef.current?.scrollIntoView({ behavior: </span><span class="s4">'smooth'</span><span class="s2"> });</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>}, [messages]);</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">  </span></span><span class="s2">// Gère l'envoi d'un nouveau message</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> handleSendMessage = </span><span class="s1">async</span><span class="s2"> (e) =&gt; {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>e.preventDefault();</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">if</span><span class="s2"> (newMessage.trim() === </span><span class="s4">''</span><span class="s2"> || !db || !userId || !chatCode || !userName) </span><span class="s1">return</span><span class="s2">;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">try</span><span class="s2"> {</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s2">// Ajout du message à la collection Firestore du salon de chat</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">await</span><span class="s2"> addDoc(collection(db, </span><span class="s4">`artifacts/</span><span class="s2">${appId}</span><span class="s4">/public/data/chats/</span><span class="s2">${chatCode}</span><span class="s4">/messages`</span><span class="s2">), {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>text: newMessage,</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">        </span>timestamp: serverTimestamp(), </span><span class="s2">// Horodatage du serveur pour un tri précis</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">        </span>name: userName, </span><span class="s2">// Utilise le nom d'utilisateur choisi</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>userId: userId,</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>});</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>setNewMessage(</span><span class="s4">''</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>} </span><span class="s1">catch</span><span class="s2"> (error) {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>console.error(</span><span class="s2">"Erreur lors de l'envoi du message:"</span><span class="s6">, error);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>};</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">  </span></span><span class="s2">// Gère la soumission du code de chat et du mot de passe</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> handleRoomAccessSubmit = </span><span class="s1">async</span><span class="s2"> (e) =&gt; {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>e.preventDefault();</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">    </span>setAccessError(</span><span class="s4">''</span><span class="s6">); </span><span class="s2">// Réinitialise les erreurs</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">const</span><span class="s2"> cleanedCode = chatCode.trim().toUpperCase();</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">const</span><span class="s2"> cleanedPassword = chatPassword.trim();</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">    </span></span><span class="s2">// Validation du code de chat (4 caractères alphanumériques)</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">if</span><span class="s2"> (cleanedCode.length !== </span><span class="s8">4</span><span class="s2"> || !</span><span class="s9">/^[A-Z0-9]{4}$/</span><span class="s2">.test(cleanedCode)) {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>setAccessError(</span><span class="s2">'Le code de salon doit être composé de 4 lettres ou chiffres (ex: ED6G).'</span><span class="s6">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">return</span><span class="s2">;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">if</span><span class="s2"> (!db) {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>setAccessError(</span><span class="s2">'Base de données non initialisée.'</span><span class="s6">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">return</span><span class="s2">;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">try</span><span class="s2"> {</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s2">// Référence au document du salon de chat</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">const</span><span class="s2"> chatRoomRef = doc(db, </span><span class="s4">`artifacts/</span><span class="s2">${appId}</span><span class="s4">/public/data/chatRooms`</span><span class="s2">, cleanedCode);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">const</span><span class="s2"> chatRoomSnap = </span><span class="s1">await</span><span class="s2"> getDoc(chatRoomRef);</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span></span><span class="s1">if</span><span class="s2"> (chatRoomSnap.exists()) {</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">        </span></span><span class="s2">// Le salon existe, vérifier le mot de passe s'il y en a un</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">const</span><span class="s2"> roomData = chatRoomSnap.data();</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">if</span><span class="s2"> (roomData.password &amp;&amp; roomData.password !== cleanedPassword) {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">          </span>setAccessError(</span><span class="s2">'Mot de passe incorrect pour ce salon.'</span><span class="s6">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span></span><span class="s1">return</span><span class="s2">;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>} </span><span class="s1">else</span><span class="s2"> </span><span class="s1">if</span><span class="s2"> (!roomData.password &amp;&amp; cleanedPassword) {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">          </span>setAccessError(</span><span class="s2">'Ce salon n\'a pas de mot de passe. Laissez le champ vide.'</span><span class="s6">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span></span><span class="s1">return</span><span class="s2">;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>} </span><span class="s1">else</span><span class="s2"> {</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">        </span></span><span class="s2">// Le salon n'existe pas, le créer</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">await</span><span class="s2"> setDoc(chatRoomRef, {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>password: cleanedPassword || </span><span class="s1">null</span><span class="s2">, </span><span class="s7">// Stocke le mot de passe ou null si vide</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>createdAt: serverTimestamp(),</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s2">// Si tout est bon, autoriser l'accès au salon</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">      </span>setChatCode(cleanedCode); </span><span class="s2">// Assure que le code est propre et en majuscules</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>setHasEnteredRoom(</span><span class="s1">true</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>} </span><span class="s1">catch</span><span class="s2"> (error) {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>console.error(</span><span class="s2">"Erreur lors de l'accès au salon:"</span><span class="s6">, error);</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>setAccessError(</span><span class="s2">'Une erreur est survenue lors de l\'accès au salon.'</span><span class="s6">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>};</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">  </span></span><span class="s2">// Gère la soumission du nom d'utilisateur</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">const</span><span class="s2"> handleUserNameSubmit = (e) =&gt; {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>e.preventDefault();</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">const</span><span class="s2"> cleanedUserName = userName.trim();</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">if</span><span class="s2"> (cleanedUserName.length &gt; </span><span class="s8">0</span><span class="s2"> &amp;&amp; cleanedUserName.length &lt;= </span><span class="s8">20</span><span class="s2">) { </span><span class="s7">// Limite de 20 caractères pour le pseudo</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>setUserName(cleanedUserName);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>setIsUserNameSet(</span><span class="s1">true</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>setUserNameError(</span><span class="s4">''</span><span class="s2">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>} </span><span class="s1">else</span><span class="s2"> {</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>setUserNameError(</span><span class="s2">'Votre pseudo doit contenir entre 1 et 20 caractères.'</span><span class="s6">);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>};</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span></span><span class="s1">if</span><span class="s2"> (loading) {</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">return</span><span class="s2"> (</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>&lt;div className=</span><span class="s2">"flex items-center justify-center min-h-screen bg-gray-100"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>&lt;div className=</span><span class="s4">"text-lg font-semibold text-gray-700"</span><span class="s2">&gt;</span><span class="s3">Chargement</span><span class="s2"> du chat...&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>);</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p4"><span class="s6"><span class="Apple-converted-space">  </span></span><span class="s2">return</span><span class="s6"> (</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">    </span>&lt;div className=</span><span class="s2">"min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 font-sans"</span><span class="s6">&gt;</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">      </span>&lt;div className=</span><span class="s2">"bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl flex flex-col h-[90vh]"</span><span class="s6">&gt;</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">        </span>{</span><span class="s2">/* En-tête du chat */</span><span class="s6">}</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">        </span>&lt;div className=</span><span class="s2">"bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-t-xl shadow-md"</span><span class="s6">&gt;</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">          </span>&lt;h1 className=</span><span class="s2">"text-3xl font-bold text-center"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;span role=</span><span class="s4">"img"</span><span class="s2"> aria-label=</span><span class="s4">"chat bubble"</span><span class="s2">&gt;</span><span class="s10">💬</span><span class="s2">&lt;/span&gt; </span><span class="s3">Chat</span><span class="s2"> en </span><span class="s3">Temps</span><span class="s2"> </span><span class="s3">R</span><span class="s10">é</span><span class="s2">el</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>{userId &amp;&amp; (</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">            </span>&lt;p className=</span><span class="s2">"text-sm text-center mt-1 opacity-90"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span></span><span class="s3">Votre</span><span class="s2"> </span><span class="s3">ID</span><span class="s2"> utilisateur: &lt;span className=</span><span class="s4">"font-mono bg-blue-700 px-2 py-1 rounded-md"</span><span class="s2">&gt;{userId}&lt;/span&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>{hasEnteredRoom &amp;&amp; (</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">            </span>&lt;p className=</span><span class="s2">"text-xl font-semibold text-center mt-2"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span></span><span class="s3">Salon</span><span class="s2"> actuel: &lt;span className=</span><span class="s4">"font-mono bg-blue-700 px-3 py-1 rounded-md"</span><span class="s2">&gt;{chatCode}&lt;/span&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>{isUserNameSet &amp;&amp; (</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">            </span>&lt;p className=</span><span class="s2">"text-xl font-semibold text-center mt-2"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span></span><span class="s3">Votre</span><span class="s2"> pseudo: &lt;span className=</span><span class="s4">"font-mono bg-blue-700 px-3 py-1 rounded-md"</span><span class="s2">&gt;{userName}&lt;/span&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>{!hasEnteredRoom ? (</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">          </span></span><span class="s2">// Formulaire pour définir le code de chat et le mot de passe</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">          </span>&lt;div className=</span><span class="s2">"flex-grow flex flex-col items-center justify-center p-6"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;form onSubmit={handleRoomAccessSubmit} className=</span><span class="s4">"w-full max-w-sm bg-gray-50 p-6 rounded-lg shadow-inner"</span><span class="s2">&gt;</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">              </span>&lt;label htmlFor=</span><span class="s2">"chatCode"</span><span class="s6"> className=</span><span class="s2">"block text-gray-700 text-lg font-semibold mb-3"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s3">Entrez</span><span class="s2"> un code de salon (</span><span class="s8">4</span><span class="s2"> caract</span><span class="s10">è</span><span class="s2">res) :</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/label&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;p className=</span><span class="s4">"text-sm text-gray-600 mb-2"</span><span class="s2">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s3">Ceci</span><span class="s2"> est un identifiant pour le salon de discussion. </span><span class="s3">Partagez</span><span class="s2">-le avec vos amis !</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;input</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">type</span><span class="s2">=</span><span class="s4">"text"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>id=</span><span class="s4">"chatCode"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>value={chatCode}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>onChange={(e) =&gt; setChatCode(e.target.value)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>placeholder=</span><span class="s4">"Ex: ED6G"</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>className=</span><span class="s2">"w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 uppercase"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>maxLength=</span><span class="s4">"4"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>required</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>/&gt;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">              </span>&lt;label htmlFor=</span><span class="s2">"chatPassword"</span><span class="s6"> className=</span><span class="s2">"block text-gray-700 text-lg font-semibold mt-5 mb-3"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s3">Mot</span><span class="s2"> de passe (optionnel) :</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/label&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;p className=</span><span class="s4">"text-sm text-gray-600 mb-2"</span><span class="s2">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s3">Si</span><span class="s2"> vous cr</span><span class="s10">é</span><span class="s2">ez un nouveau salon, ajoutez un mot de passe ici. </span><span class="s3">Si</span><span class="s2"> vous rejoignez un salon existant, entrez son mot de passe s</span><span class="s4">'il en a un.</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;input</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">                </span></span><span class="s1">type</span><span class="s6">=</span><span class="s4">"password"</span><span class="s6"> </span><span class="s2">// Utilise type="password" pour masquer la saisie</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>id=</span><span class="s4">"chatPassword"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>value={chatPassword}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>onChange={(e) =&gt; setChatPassword(e.target.value)}</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>placeholder=</span><span class="s2">"Laissez vide si pas de mot de passe"</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>className=</span><span class="s2">"w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>/&gt;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>{accessError &amp;&amp; (</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>&lt;p className=</span><span class="s4">"text-red-500 text-sm mt-4"</span><span class="s2">&gt;{accessError}&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>)}</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;button</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">type</span><span class="s2">=</span><span class="s4">"submit"</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>className=</span><span class="s2">"mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s3">Rejoindre</span><span class="s2"> / </span><span class="s3">Cr</span><span class="s10">é</span><span class="s2">er le </span><span class="s3">Salon</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;/form&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>) : !isUserNameSet ? (</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">          </span></span><span class="s2">// Formulaire pour définir le nom d'utilisateur</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">          </span>&lt;div className=</span><span class="s2">"flex-grow flex flex-col items-center justify-center p-6"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;form onSubmit={handleUserNameSubmit} className=</span><span class="s4">"w-full max-w-sm bg-gray-50 p-6 rounded-lg shadow-inner"</span><span class="s2">&gt;</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">              </span>&lt;label htmlFor=</span><span class="s2">"userName"</span><span class="s6"> className=</span><span class="s2">"block text-gray-700 text-lg font-semibold mb-3"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s3">Choisissez</span><span class="s2"> votre pseudo :</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/label&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;input</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">type</span><span class="s2">=</span><span class="s4">"text"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>id=</span><span class="s4">"userName"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>value={userName}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>onChange={(e) =&gt; setUserName(e.target.value)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>placeholder=</span><span class="s4">"Ex: SuperChatteur"</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>className=</span><span class="s2">"w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>maxLength=</span><span class="s4">"20"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>required</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>/&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>{userNameError &amp;&amp; (</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>&lt;p className=</span><span class="s4">"text-red-500 text-sm mt-2"</span><span class="s2">&gt;{userNameError}&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;button</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">type</span><span class="s2">=</span><span class="s4">"submit"</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>className=</span><span class="s2">"mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s3">Rejoindre</span><span class="s2"> le </span><span class="s3">Chat</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;/form&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>) : (</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">          </span></span><span class="s2">// Interface du chat</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>&lt;&gt;</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">            </span>&lt;div className=</span><span class="s2">"flex-grow p-6 overflow-y-auto bg-gray-50"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>{messages.length === </span><span class="s8">0</span><span class="s2"> ? (</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>&lt;div className=</span><span class="s2">"text-center text-gray-500 mt-10"</span><span class="s6">&gt;</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                  </span></span><span class="s3">Aucun</span><span class="s6"> message pour l</span><span class="s2">'instant dans ce salon. Soyez le premier à envoyer un message !</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>) : (</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>messages.map((msg) =&gt; (</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>&lt;div</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span>key={msg.id}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span>className={</span><span class="s4">`flex mb-4 </span><span class="s2">${msg.userId === userId ? </span><span class="s4">'justify-end'</span><span class="s2"> : </span><span class="s4">'justify-start'</span><span class="s2">}</span><span class="s4">`</span><span class="s2">}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span>&lt;div</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                      </span>className={</span><span class="s2">`max-w-[75%] p-3 rounded-xl shadow-md </span><span class="s6">${</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                        </span>msg.userId === userId</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                          </span>? </span><span class="s2">'bg-blue-500 text-white rounded-br-none'</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                          </span>: </span><span class="s2">'bg-gray-200 text-gray-800 rounded-bl-none'</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                      </span>}</span><span class="s4">`</span><span class="s2">}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span>&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                      </span>&lt;div className=</span><span class="s4">"font-semibold text-sm mb-1"</span><span class="s2">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                        </span>{msg.userId === userId ? </span><span class="s4">'Moi'</span><span class="s2"> : msg.name || </span><span class="s4">'Anonyme'</span><span class="s2">}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                      </span>&lt;p className=</span><span class="s4">"text-base break-words"</span><span class="s2">&gt;{msg.text}&lt;/p&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                      </span>&lt;div className=</span><span class="s4">"text-xs mt-1 opacity-80 text-right"</span><span class="s2">&gt;</span></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">                        </span>{</span><span class="s2">/* Affichage de l'heure avec un fallback pour les horodatages en attente */</span><span class="s6">}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                        </span>{msg.timestamp &amp;&amp; </span><span class="s1">typeof</span><span class="s2"> msg.timestamp.toDate === </span><span class="s4">'function'</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                          </span>? msg.timestamp.toDate().toLocaleTimeString(</span><span class="s4">'fr-FR'</span><span class="s2">, { hour: </span><span class="s4">'2-digit'</span><span class="s2">, minute: </span><span class="s4">'2-digit'</span><span class="s2"> })</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                          </span>: </span><span class="s4">'Envoi...'</span><span class="s2">}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>))</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;div ref={messagesEndRef} /&gt; {</span><span class="s7">/* Point de défilement */</span><span class="s2">}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p3"><span class="s6"><span class="Apple-converted-space">            </span>{</span><span class="s2">/* Formulaire d'envoi de message */</span><span class="s6">}</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">            </span>&lt;form onSubmit={handleSendMessage} className=</span><span class="s2">"p-4 bg-white border-t border-gray-200 flex items-center gap-3 rounded-b-xl shadow-inner"</span><span class="s6">&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;input</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">type</span><span class="s2">=</span><span class="s4">"text"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>value={newMessage}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>onChange={(e) =&gt; setNewMessage(e.target.value)}</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>placeholder=</span><span class="s2">"Écrivez votre message ici..."</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>className=</span><span class="s2">"flex-grow p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>required</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>/&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;button</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">type</span><span class="s2">=</span><span class="s4">"submit"</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                </span>className=</span><span class="s2">"bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-110 flex items-center justify-center"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>aria-label=</span><span class="s4">"Envoyer le message"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>&lt;svg</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                  </span>xmlns=</span><span class="s2">"http://www.w3.org/2000/svg"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>className=</span><span class="s4">"h-6 w-6"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>fill=</span><span class="s4">"none"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>viewBox=</span><span class="s4">"0 0 24 24"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>stroke=</span><span class="s4">"currentColor"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>strokeWidth={</span><span class="s8">2</span><span class="s2">}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>&lt;path</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span>strokeLinecap=</span><span class="s4">"round"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span>strokeLinejoin=</span><span class="s4">"round"</span></p>
-<p class="p5"><span class="s6"><span class="Apple-converted-space">                    </span>d=</span><span class="s2">"M14 5l7 7m0 0l-7 7m7-7H3"</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                  </span>/&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span>&lt;/svg&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">              </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span>&lt;/form&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">          </span>&lt;/&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span>)}</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s2"><span class="Apple-converted-space">  </span>);</span></p>
-<p class="p1"><span class="s2">}</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-<p class="p4"><span class="s2">export</span><span class="s6"> </span><span class="s2">default</span><span class="s6"> </span><span class="s3">App</span><span class="s6">;</span></p>
-<p class="p2"><span class="s5"></span><br></p>
-</body>
-</html>
+import React, { useState, useEffect, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
+
+// Définition des variables globales fournies par l'environnement Canvas
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? initialAuthToken : null;
+
+function App() {
+  const [db, setDb] = useState(null);
+  const [auth, setAuth] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [chatCode, setChatCode] = useState('');
+  const [chatPassword, setChatPassword] = useState(''); // Nouveau state pour le mot de passe du salon
+  const [userName, setUserName] = useState('');
+  const [hasEnteredRoom, setHasEnteredRoom] = useState(false); // Indique si l'accès au salon est validé
+  const [isUserNameSet, setIsUserNameSet] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef(null);
+  const [accessError, setAccessError] = useState(''); // Erreurs pour l'accès au salon (code/mdp)
+  const [userNameError, setUserNameError] = useState('');
+
+  // Initialisation de Firebase et authentification
+  useEffect(() => {
+    const app = initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const firebaseAuth = getAuth(app);
+
+    setDb(firestore);
+    setAuth(firebaseAuth);
+
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        try {
+          if (initialAuthToken) {
+            await signInWithCustomToken(firebaseAuth, initialAuthToken);
+          } else {
+            await signInAnonymously(firebaseAuth);
+          }
+        } catch (error) {
+          console.error("Erreur d'authentification:", error);
+        }
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Écoute des messages en temps réel depuis Firestore pour le salon de chat spécifique
+  useEffect(() => {
+    // Les messages sont chargés seulement si l'accès au salon et le nom d'utilisateur sont définis
+    if (db && userId && hasEnteredRoom && isUserNameSet && chatCode) {
+      // Chemin de la collection pour les messages du salon de chat spécifique
+      // Les messages sont stockés dans /artifacts/{appId}/public/data/chats/{chatCode}/messages
+      const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/chats/${chatCode}/messages`);
+      // Requête pour obtenir les messages triés par horodatage
+      const q = query(messagesCollectionRef, orderBy('timestamp'));
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetchedMessages = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setMessages(fetchedMessages);
+      }, (error) => {
+        console.error("Erreur lors de la récupération des messages:", error);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [db, userId, hasEnteredRoom, isUserNameSet, chatCode]);
+
+  // Défilement automatique vers le bas des messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Gère l'envoi d'un nouveau message
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (newMessage.trim() === '' || !db || !userId || !chatCode || !userName) return;
+
+    try {
+      // Ajout du message à la collection Firestore du salon de chat
+      await addDoc(collection(db, `artifacts/${appId}/public/data/chats/${chatCode}/messages`), {
+        text: newMessage,
+        timestamp: serverTimestamp(), // Horodatage du serveur pour un tri précis
+        name: userName, // Utilise le nom d'utilisateur choisi
+        userId: userId,
+      });
+      setNewMessage('');
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message:", error);
+    }
+  };
+
+  // Gère la soumission du code de chat et du mot de passe
+  const handleRoomAccessSubmit = async (e) => {
+    e.preventDefault();
+    setAccessError(''); // Réinitialise les erreurs
+
+    const cleanedCode = chatCode.trim().toUpperCase();
+    const cleanedPassword = chatPassword.trim();
+
+    // Validation du code de chat (4 caractères alphanumériques)
+    if (cleanedCode.length !== 4 || !/^[A-Z0-9]{4}$/.test(cleanedCode)) {
+      setAccessError('Le code de salon doit être composé de 4 lettres ou chiffres (ex: ED6G).');
+      return;
+    }
+
+    if (!db) {
+      setAccessError('Base de données non initialisée.');
+      return;
+    }
+
+    try {
+      // Référence au document du salon de chat
+      const chatRoomRef = doc(db, `artifacts/${appId}/public/data/chatRooms`, cleanedCode);
+      const chatRoomSnap = await getDoc(chatRoomRef);
+
+      if (chatRoomSnap.exists()) {
+        // Le salon existe, vérifier le mot de passe s'il y en a un
+        const roomData = chatRoomSnap.data();
+        if (roomData.password && roomData.password !== cleanedPassword) {
+          setAccessError('Mot de passe incorrect pour ce salon.');
+          return;
+        } else if (!roomData.password && cleanedPassword) {
+          setAccessError('Ce salon n\'a pas de mot de passe. Laissez le champ vide.');
+          return;
+        }
+      } else {
+        // Le salon n'existe pas, le créer
+        await setDoc(chatRoomRef, {
+          password: cleanedPassword || null, // Stocke le mot de passe ou null si vide
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // Si tout est bon, autoriser l'accès au salon
+      setChatCode(cleanedCode); // Assure que le code est propre et en majuscules
+      setHasEnteredRoom(true);
+    } catch (error) {
+      console.error("Erreur lors de l'accès au salon:", error);
+      setAccessError('Une erreur est survenue lors de l\'accès au salon.');
+    }
+  };
+
+  // Gère la soumission du nom d'utilisateur
+  const handleUserNameSubmit = (e) => {
+    e.preventDefault();
+    const cleanedUserName = userName.trim();
+    if (cleanedUserName.length > 0 && cleanedUserName.length <= 20) { // Limite de 20 caractères pour le pseudo
+      setUserName(cleanedUserName);
+      setIsUserNameSet(true);
+      setUserNameError('');
+    } else {
+      setUserNameError('Votre pseudo doit contenir entre 1 et 20 caractères.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-lg font-semibold text-gray-700">Chargement du chat...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 font-sans">
+      <div className="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl flex flex-col h-[90vh]">
+        {/* En-tête du chat */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-t-xl shadow-md">
+          <h1 className="text-3xl font-bold text-center">
+            <span role="img" aria-label="chat bubble">💬</span> Chat en Temps Réel
+          </h1>
+          {userId && (
+            <p className="text-sm text-center mt-1 opacity-90">
+              Votre ID utilisateur: <span className="font-mono bg-blue-700 px-2 py-1 rounded-md">{userId}</span>
+            </p>
+          )}
+          {hasEnteredRoom && (
+            <p className="text-xl font-semibold text-center mt-2">
+              Salon actuel: <span className="font-mono bg-blue-700 px-3 py-1 rounded-md">{chatCode}</span>
+            </p>
+          )}
+          {isUserNameSet && (
+            <p className="text-xl font-semibold text-center mt-2">
+              Votre pseudo: <span className="font-mono bg-blue-700 px-3 py-1 rounded-md">{userName}</span>
+            </p>
+          )}
+        </div>
+
+        {!hasEnteredRoom ? (
+          // Formulaire pour définir le code de chat et le mot de passe
+          <div className="flex-grow flex flex-col items-center justify-center p-6">
+            <form onSubmit={handleRoomAccessSubmit} className="w-full max-w-sm bg-gray-50 p-6 rounded-lg shadow-inner">
+              <label htmlFor="chatCode" className="block text-gray-700 text-lg font-semibold mb-3">
+                Entrez un code de salon (4 caractères) :
+              </label>
+              <p className="text-sm text-gray-600 mb-2">
+                Ceci est un identifiant pour le salon de discussion. Partagez-le avec vos amis !
+              </p>
+              <input
+                type="text"
+                id="chatCode"
+                value={chatCode}
+                onChange={(e) => setChatCode(e.target.value)}
+                placeholder="Ex: ED6G"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 uppercase"
+                maxLength="4"
+                required
+              />
+
+              <label htmlFor="chatPassword" className="block text-gray-700 text-lg font-semibold mt-5 mb-3">
+                Mot de passe (optionnel) :
+              </label>
+              <p className="text-sm text-gray-600 mb-2">
+                Si vous créez un nouveau salon, ajoutez un mot de passe ici. Si vous rejoignez un salon existant, entrez son mot de passe s'il en a un.
+              </p>
+              <input
+                type="password" // Utilise type="password" pour masquer la saisie
+                id="chatPassword"
+                value={chatPassword}
+                onChange={(e) => setChatPassword(e.target.value)}
+                placeholder="Laissez vide si pas de mot de passe"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              />
+
+              {accessError && (
+                <p className="text-red-500 text-sm mt-4">{accessError}</p>
+              )}
+
+              <button
+                type="submit"
+                className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+              >
+                Rejoindre / Créer le Salon
+              </button>
+            </form>
+          </div>
+        ) : !isUserNameSet ? (
+          // Formulaire pour définir le nom d'utilisateur
+          <div className="flex-grow flex flex-col items-center justify-center p-6">
+            <form onSubmit={handleUserNameSubmit} className="w-full max-w-sm bg-gray-50 p-6 rounded-lg shadow-inner">
+              <label htmlFor="userName" className="block text-gray-700 text-lg font-semibold mb-3">
+                Choisissez votre pseudo :
+              </label>
+              <input
+                type="text"
+                id="userName"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder="Ex: SuperChatteur"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                maxLength="20"
+                required
+              />
+              {userNameError && (
+                <p className="text-red-500 text-sm mt-2">{userNameError}</p>
+              )}
+              <button
+                type="submit"
+                className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+              >
+                Rejoindre le Chat
+              </button>
+            </form>
+          </div>
+        ) : (
+          // Interface du chat
+          <>
+            <div className="flex-grow p-6 overflow-y-auto bg-gray-50">
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-500 mt-10">
+                  Aucun message pour l'instant dans ce salon. Soyez le premier à envoyer un message !
+                </div>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex mb-4 ${msg.userId === userId ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[75%] p-3 rounded-xl shadow-md ${
+                        msg.userId === userId
+                          ? 'bg-blue-500 text-white rounded-br-none'
+                          : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm mb-1">
+                        {msg.userId === userId ? 'Moi' : msg.name || 'Anonyme'}
+                      </div>
+                      <p className="text-base break-words">{msg.text}</p>
+                      <div className="text-xs mt-1 opacity-80 text-right">
+                        {/* Affichage de l'heure avec un fallback pour les horodatages en attente */}
+                        {msg.timestamp && typeof msg.timestamp.toDate === 'function'
+                          ? msg.timestamp.toDate().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                          : 'Envoi...'}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} /> {/* Point de défilement */}
+            </div>
+
+            {/* Formulaire d'envoi de message */}
+            <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-200 flex items-center gap-3 rounded-b-xl shadow-inner">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Écrivez votre message ici..."
+                className="flex-grow p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-110 flex items-center justify-center"
+                aria-label="Envoyer le message"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
